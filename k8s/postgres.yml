@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: targets-postgres # Sets Deployment name
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: targets-postgres
+  template:
+    metadata:
+      labels:
+        app: targets-postgres
+    spec:
+      containers:
+        - name: targets-postgres
+          image: postgres:15.2 # Sets Image
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432 # Exposes container port
+          envFrom:
+            - configMapRef:
+                name: targets-postgres-config
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data
+          volumeMounts:
+            - mountPath: /var/lib/postgresql
+              name: targets-postgredb
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - exec pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER} -h localhost -p 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            limits:
+              memory: "3Gi"
+              cpu: "1000m"
+      volumes:
+        - name: targets-postgredb
+          persistentVolumeClaim:
+            claimName: targets-postgres-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: targets-postgres # Sets service name
+  labels:
+    app: targets-postgres # Labels and Selectors
+spec:
+  ports:
+    - port: 5432 # Sets port to run the postgres application
+  selector:
+    app: targets-postgres
