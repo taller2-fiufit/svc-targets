@@ -2,9 +2,9 @@ name: "CI"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ '*' ]
+    branches: ["*"]
   merge_group:
     types: [checks_requested]
 
@@ -12,8 +12,8 @@ env:
   POSTGRES_DB: db
   POSTGRES_USER: user
   POSTGRES_PASSWORD: postgres
-  TRAININGS_POSTGRES_SERVICE_HOST: localhost
-  TRAININGS_POSTGRES_SERVICE_PORT: 5432
+  TARGETS_POSTGRES_SERVICE_HOST: localhost
+  TARGETS_POSTGRES_SERVICE_PORT: 5432
 
 jobs:
   ci:
@@ -49,8 +49,8 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          cache: 'poetry'
+          python-version: "3.11"
+          cache: "poetry"
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
