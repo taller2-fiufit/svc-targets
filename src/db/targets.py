@@ -68,3 +68,21 @@ async def patch_target(
     await session.commit()
 
     return Target.from_orm(target)
+
+
+async def delete_target(session: AsyncSession, author: int, id: int) -> Target:
+    """Deletes the target"""
+
+    target = await session.get(DBTarget, id)
+
+    if target is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Target not found")
+
+    if target.author != author:
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, "User isn't author of the target"
+        )
+
+    await session.delete(target)
+
+    return Target.from_orm(target)

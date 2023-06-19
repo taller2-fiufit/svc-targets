@@ -72,3 +72,15 @@ async def patch_target(
     )
     info(f"Target edited: {edited_target}")
     return edited_target
+
+
+@router.delete("/{id}")
+async def delete_target(
+    session: SessionDep,
+    user: UserDep,
+    id: int,
+) -> Target:
+    """Edit target's attributes"""
+    deleted_target = await targets_db.delete_target(session, user.sub, id)
+    info(f"Target deleted: {deleted_target}")
+    return deleted_target

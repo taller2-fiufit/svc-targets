@@ -7,6 +7,7 @@ from src.api.model.target import (
     PatchTarget,
     Target,
 )
+from src.test_utils import assert_returns_empty
 
 
 async def test_targets_get_empty(check_empty_targets: None) -> None:
@@ -65,6 +66,19 @@ async def test_targets_patch(
     response = await client.get(f"/targets/{got.id}")
     assert response.status_code == HTTPStatus.OK
     assert got == Target(**response.json())
+
+
+async def test_targets_delete(
+    created_body: Target, client: AsyncClient
+) -> None:
+    response = await client.delete(f"/targets/{created_body.id}")
+    assert response.status_code == HTTPStatus.OK
+
+    got = Target(**response.json())
+
+    assert got == created_body
+
+    await assert_returns_empty(client, "/targets")
 
 
 async def assert_invalid(body: dict[str, Any], client: AsyncClient) -> None:
