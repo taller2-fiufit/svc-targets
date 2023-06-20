@@ -5,14 +5,15 @@ from httpx import AsyncClient
 from typing import AsyncGenerator, Generator
 from http import HTTPStatus
 
+from src.test_utils import assert_returns_empty
 from src.auth import get_admin, get_user, ignore_auth
 from src.db.migration import downgrade_db
 from src.main import app, lifespan
 from src.api.model.target import (
     CreateTarget,
+    Multimedia,
     Target,
 )
-from src.test_utils import assert_returns_empty
 
 
 # https://stackoverflow.com/questions/71925980/cannot-perform-operation-another-operation-is-in-progress-in-pytest
@@ -61,6 +62,7 @@ async def created_body(client: AsyncClient) -> Target:
         current=0.0,
         target=1.0,
         unit="Kms",
+        multimedia=[Multimedia("url1"), Multimedia("url2")],
     )
 
     response = await client.post("/targets", json=body.dict())
