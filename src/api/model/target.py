@@ -1,7 +1,15 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from fastapi import Query
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, ConstrainedStr, Field, root_validator
 from src.api.model.utils import OrmModel, make_all_required
+
+
+class Multimedia(ConstrainedStr):
+    max_length = 255
+    strip_whitespace = True
+
+    class Config:
+        orm_mode = True
 
 
 class TargetBase(OrmModel):
@@ -43,6 +51,12 @@ class TargetBase(OrmModel):
         description="The target's progress unit. "
         "E.g.: 'kg', 'km', 'm', 'cm', 'h', 'min', 's', etc.",
         max_length=30,
+        default=None,
+    )
+    multimedia: Optional[List[Multimedia]] = Field(
+        title="Multimedia resources",
+        description="The target's multimedia resources (images or videos)",
+        max_items=4,
         default=None,
     )
 

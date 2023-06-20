@@ -107,6 +107,12 @@ async def test_targets_invalid_body(
     # too long description
     await assert_invalid({**body.dict(), "description": "a" * 301}, client)
 
+    # too many multimedia resources
+    await assert_invalid({**body.dict(), "multimedia": ["url"] * 5}, client)
+
+    # too long multimedia url
+    await assert_invalid({**body.dict(), "multimedia": ["a" * 256]}, client)
+
     # current is greater than target
     # - in POST it fails
     req_body = {**body.dict(), "current": body.target + 1}

@@ -24,7 +24,7 @@ async def get_all_targets(
     res = await session.scalars(query.offset(offset).limit(limit))
     targets = res.all()
 
-    return list(map(Target.from_orm, targets))
+    return list(map(DBTarget.to_api_model, targets))
 
 
 async def get_target_by_id(session: AsyncSession, id: int) -> Target:
@@ -33,18 +33,18 @@ async def get_target_by_id(session: AsyncSession, id: int) -> Target:
     if target is None:
         raise HTTPException(HTTPStatus.NOT_FOUND, "Target not found")
 
-    return Target.from_orm(target)
+    return target.to_api_model()
 
 
 async def create_target(
     session: AsyncSession, author: int, target: CreateTarget
 ) -> Target:
-    new_target = DBTarget(author=author, **target.dict())
+    new_target = DBTarget.from_api_model(author, target)
 
     session.add(new_target)
     await session.commit()
 
-    return Target.from_orm(new_target)
+    return new_target.to_api_model()
 
 
 async def patch_target(
@@ -67,7 +67,7 @@ async def patch_target(
     session.add(target)
     await session.commit()
 
-    return Target.from_orm(target)
+    return target.to_api_model()
 
 
 async def delete_target(session: AsyncSession, author: int, id: int) -> Target:
@@ -85,4 +85,4 @@ async def delete_target(session: AsyncSession, author: int, id: int) -> Target:
 
     await session.delete(target)
 
-    return Target.from_orm(target)
+    return target.to_api_model()

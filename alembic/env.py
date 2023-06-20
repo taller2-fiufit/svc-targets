@@ -14,7 +14,7 @@ from src.db.config import SQLALCHEMY_DATABASE_URL
 
 # import needed to run model classes declarations
 # as that adds needed metadata to Base
-from src.db.model.target import DBTarget  # noqa # type: ignore
+from src.db.model.target import DBTarget, DBMultimedia  # noqa # type: ignore
 
 
 # this is the Alembic Config object, which provides
