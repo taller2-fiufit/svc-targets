@@ -49,16 +49,9 @@ async def create_target(
 
 
 def modifies_expired(target: DBTarget, patch: PatchTarget) -> bool:
-    print("target.limit", target.limit)
-    print("patch.limit", patch.limit)
-    print("limit_is_expired", limit_is_expired(target.limit))
-    if patch.limit is not None and patch.limit != target.limit:
+    if patch.limit is not None and patch.limit // 1000 != target.limit:
         return False
 
-    print("target.current", target.current)
-    print("patch.current", patch.current)
-    print("target.target", target.target)
-    print("patch.target", patch.target)
     curr_was_modified = patch.current is not None and patch.current != target.current
     targ_was_modified = patch.target is not None and patch.target != target.target
     return limit_is_expired(target.limit) and (curr_was_modified or targ_was_modified)
