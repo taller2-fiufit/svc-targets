@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from httpx import AsyncClient
 from http import HTTPStatus
@@ -126,6 +127,7 @@ async def test_targets_invalid_body(
     resp_patch = await client.patch("/targets/1", json=req_body)
     assert resp_patch.status_code == HTTPStatus.OK
     assert resp_patch.json()["current"] == body.target
+
 
 async def test_cannot_modify_expired_target(
         created_body: Target, client: AsyncClient
