@@ -138,11 +138,14 @@ async def test_cannot_modify_expired_target(
     response = await client.patch("/targets/1", json=body.dict())
     assert response.json()["expired"]
 
-    body.name = "other name"
-
     # mypy needs reassurance
     assert body.current is not None
     assert body.target is not None
 
-    await assert_invalid({**body.dict(), "current": body.current + 1}, client)
-    await assert_invalid({**body.dict(), "target": body.target + 1}, client)
+    body_curr = {**body.dict(), "current": body.current + 1}
+    resp_patch = await client.patch("/targets/1", json=body_curr)
+    assert resp_patch.status_code == HTTPStatus.CONFLICT
+
+    body_target = {**body.dict(), "target": body.target + 1}
+    resp_patch = await client.patch("/targets/1", json=body_target)
+    assert resp_patch.status_code == HTTPStatus.CONFLICT
