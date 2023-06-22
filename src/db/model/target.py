@@ -53,6 +53,7 @@ class DBTarget(Base):
     ) -> "DBTarget":
         # this never happens, but mypy needs reassurance
         assert target.multimedia is not None
+        assert target.limit is not None
 
         db_multimedia = multimedia_api_to_db(target.multimedia)
 
