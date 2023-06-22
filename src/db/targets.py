@@ -71,7 +71,7 @@ async def patch_target(
         raise HTTPException(
             HTTPStatus.UNAUTHORIZED, "User isn't author of the target"
         )
-    
+
     if modifies_expired(target, patch):
         raise HTTPException(
             HTTPStatus.CONFLICT, "Cannot modify expired target"
