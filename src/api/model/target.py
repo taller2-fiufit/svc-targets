@@ -28,8 +28,8 @@ class TargetBase(OrmModel):
     )
     limit: Optional[int] = Field(
         title="Time limit",
-        description="The target's time limit. "
-        "After this date, the target can't be completed",
+        description="The target's time limit in milliseconds. "
+        "After this date, the target can't be completed.",
         default=None,
     )
     current: Optional[float] = Field(
@@ -87,6 +87,14 @@ class PatchTarget(TargetBase):
 
 class Target(AllRequiredTargetBase):
     id: int = Field(title="ID", description="The target's ID")
+    completed: bool = Field(
+        title="Was completed?",
+        description="True if the target was completed, false otherwise."
+    )
+    expired: bool = Field(
+        title="Is it expired?",
+        description="True if the target reached its time limit, false otherwise."
+    )
 
 
 class FilterParams(BaseModel):

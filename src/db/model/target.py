@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from src.api.model.target import CreateTarget, Multimedia, Target
 from src.db.model.base import Base
+from src.common import limit_is_expired
 
 
 class DBMultimedia(Base):
@@ -36,7 +37,7 @@ class DBTarget(Base):
     author: Mapped[int] = mapped_column(Integer)
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
-    limit: Mapped[int] = mapped_column(Integer)
+    limit: Mapped[int] = mapped_column(Integer)  # in seconds
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
     unit: Mapped[str] = mapped_column(String(30))
@@ -53,11 +54,13 @@ class DBTarget(Base):
     ) -> "DBTarget":
         # this never happens, but mypy needs reassurance
         assert target.multimedia is not None
+        assert target.limit is not None
 
         db_multimedia = multimedia_api_to_db(target.multimedia)
 
         kwargs = {
             **target.dict(),
+            "limit": target.limit // 1000,  # from ms
             "multimedia": db_multimedia,
         }
 
@@ -70,11 +73,13 @@ class DBTarget(Base):
             id=self.id,
             name=self.name,
             description=self.description,
-            limit=self.limit,
+            limit=self.limit * 1000,  # to ms
             current=self.current,
             target=self.target,
             unit=self.unit,
             multimedia=multimedia,
+            completed=self.current == self.target,
+            expired=limit_is_expired(self.limit),
         )
 
     def update(
@@ -93,7 +98,7 @@ class DBTarget(Base):
         if description is not None:
             self.description = description
         if limit is not None:
-            self.limit = limit
+            self.limit = limit // 1000  # from ms
         if current is not None:
             self.current = current
         if target is not None:
