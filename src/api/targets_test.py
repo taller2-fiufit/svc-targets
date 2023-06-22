@@ -133,12 +133,12 @@ async def test_cannot_modify_expired_target(
         created_body: Target, client: AsyncClient
 ) -> None:
     body = CreateTarget(**created_body.dict())
-    body.limit = (datetime.now().timestamp() - 9) * 1000
+    body.limit = int((datetime.now().timestamp() - 9) * 1000)
 
     response = await client.patch("/targets/1", json=body.dict())
-    assert response.expired
+    assert response.json()["expired"]
 
     body.name = "other name"
 
-    await assert_invalid({**body.dict(), "current": body.current + 1}, client)
-    await assert_invalid({**body.dict(), "target": body.target + 1}, client)
+    await assert_invalid({**body.dict(), "current": created_body.current + 1}, client)
+    await assert_invalid({**body.dict(), "target": created_body.target + 1}, client)
