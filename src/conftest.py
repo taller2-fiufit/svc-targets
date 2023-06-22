@@ -58,7 +58,7 @@ async def created_body(client: AsyncClient) -> Target:
     body = CreateTarget(
         name="name",
         description="description",
-        limit=int((datetime.now() + timedelta(days=1)).timestamp()),
+        limit=int((datetime.now() + timedelta(days=1)).timestamp()) * 1000,
         current=0.0,
         target=1.0,
         unit="Kms",
