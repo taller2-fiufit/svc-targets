@@ -47,6 +47,15 @@ async def create_target(
     return new_target.to_api_model()
 
 
+def modifies_expired(target: DBTarget, patch: PatchTarget) -> bool:
+    if patch.limit is not None:
+        return False
+
+    curr_was_modified = patch.current is not None and patch.current != target.current
+    targ_was_modified = patch.target is not None and patch.target != target.target
+    return target.is_expired() and (curr_was_modified or targ_was_modified)
+
+
 async def patch_target(
     session: AsyncSession, author: int, id: int, patch: PatchTarget
 ) -> Target:
@@ -60,6 +69,11 @@ async def patch_target(
     if target.author != author:
         raise HTTPException(
             HTTPStatus.UNAUTHORIZED, "User isn't author of the target"
+        )
+    
+    if modifies_expired(target, patch):
+        raise HTTPException(
+            HTTPStatus.CONFLICT, "Cannot modify expired target"
         )
 
     target.update(**patch.dict())

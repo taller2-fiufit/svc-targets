@@ -78,7 +78,11 @@ class DBTarget(Base):
             unit=self.unit,
             multimedia=multimedia,
             completed=self.current == self.target,
+            expired=self.is_expired(),
         )
+    
+    def is_expired(self) -> bool:
+        return self.limit > datetime.now().timestamp()
 
     def update(
         self,

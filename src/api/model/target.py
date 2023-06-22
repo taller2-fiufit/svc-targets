@@ -91,6 +91,10 @@ class Target(AllRequiredTargetBase):
         title="Was completed?",
         description="True if the target was completed, false otherwise."
     )
+    expired: bool = Field(
+        title="Is it expired?",
+        description="True if the target reached its time limit, false otherwise."
+    )
 
 
 class FilterParams(BaseModel):
