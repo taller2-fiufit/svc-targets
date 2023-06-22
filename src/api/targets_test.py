@@ -140,5 +140,9 @@ async def test_cannot_modify_expired_target(
 
     body.name = "other name"
 
-    await assert_invalid({**body.dict(), "current": created_body.current + 1}, client)
-    await assert_invalid({**body.dict(), "target": created_body.target + 1}, client)
+    # mypy needs reassurance
+    assert body.current is not None
+    assert body.target is not None
+
+    await assert_invalid({**body.dict(), "current": body.current + 1}, client)
+    await assert_invalid({**body.dict(), "target": body.target + 1}, client)
