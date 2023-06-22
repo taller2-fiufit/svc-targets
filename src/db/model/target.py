@@ -77,6 +77,7 @@ class DBTarget(Base):
             target=self.target,
             unit=self.unit,
             multimedia=multimedia,
+            completed=self.current == self.target,
         )
 
     def update(

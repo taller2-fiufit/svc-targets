@@ -87,6 +87,10 @@ class PatchTarget(TargetBase):
 
 class Target(AllRequiredTargetBase):
     id: int = Field(title="ID", description="The target's ID")
+    completed: bool = Field(
+        title="Was completed?",
+        description="True if the target was completed, false otherwise."
+    )
 
 
 class FilterParams(BaseModel):
