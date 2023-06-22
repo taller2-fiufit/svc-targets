@@ -69,8 +69,12 @@ async def created_body(client: AsyncClient) -> Target:
 
     assert response.status_code == HTTPStatus.CREATED
 
-    result = CreateTarget(**response.json())
+    json = response.json()
+
+    result = CreateTarget(**json)
 
     assert result == body
+    assert not json["completed"]
+    assert not json["expired"]
 
-    return Target(**response.json())
+    return Target(**json)

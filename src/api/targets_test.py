@@ -52,6 +52,7 @@ async def test_targets_patch(
     created_body: Target, client: AsyncClient
 ) -> None:
     created_body.description = "new description"
+    created_body.current = created_body.target
     body = PatchTarget(**created_body.dict())
 
     response = await client.patch(
@@ -60,6 +61,8 @@ async def test_targets_patch(
     assert response.status_code == HTTPStatus.OK
 
     got = Target(**response.json())
+
+    created_body.completed = True
 
     assert got == created_body
 
@@ -123,3 +126,17 @@ async def test_targets_invalid_body(
     resp_patch = await client.patch("/targets/1", json=req_body)
     assert resp_patch.status_code == HTTPStatus.OK
     assert resp_patch.json()["current"] == body.target
+
+async def test_cannot_modify_expired_target(
+        created_body: Target, client: AsyncClient
+) -> None:
+    body = CreateTarget(**created_body.dict())
+    body.limit = (datetime.now().timestamp() - 9) * 1000
+
+    response = await client.patch("/targets/1", json=body.dict())
+    assert response.expired
+
+    body.name = "other name"
+
+    await assert_invalid({**body.dict(), "current": body.current + 1}, client)
+    await assert_invalid({**body.dict(), "target": body.target + 1}, client)

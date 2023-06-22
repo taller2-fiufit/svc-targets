@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from src.api.model.target import CreateTarget, Multimedia, Target
 from src.db.model.base import Base
+from src.common import limit_is_expired
 
 
 class DBMultimedia(Base):
@@ -78,11 +79,8 @@ class DBTarget(Base):
             unit=self.unit,
             multimedia=multimedia,
             completed=self.current == self.target,
-            expired=self.is_expired(),
+            expired=limit_is_expired(self.limit),
         )
-    
-    def is_expired(self) -> bool:
-        return self.limit > datetime.now().timestamp()
 
     def update(
         self,

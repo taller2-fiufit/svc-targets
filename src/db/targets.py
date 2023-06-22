@@ -11,6 +11,7 @@ from src.api.model.target import (
     Target,
 )
 from src.db.model.target import DBTarget
+from src.common import limit_is_expired
 
 
 async def get_all_targets(
@@ -48,12 +49,12 @@ async def create_target(
 
 
 def modifies_expired(target: DBTarget, patch: PatchTarget) -> bool:
-    if patch.limit is not None:
+    if patch.limit is not None or patch.limit == target.limit:
         return False
 
     curr_was_modified = patch.current is not None and patch.current != target.current
     targ_was_modified = patch.target is not None and patch.target != target.target
-    return target.is_expired() and (curr_was_modified or targ_was_modified)
+    return limit_is_expired(target.limit) and (curr_was_modified or targ_was_modified)
 
 
 async def patch_target(
