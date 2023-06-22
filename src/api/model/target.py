@@ -28,8 +28,8 @@ class TargetBase(OrmModel):
     )
     limit: Optional[int] = Field(
         title="Time limit",
-        description="The target's time limit. "
-        "After this date, the target can't be completed",
+        description="The target's time limit in milliseconds. "
+        "After this date, the target can't be completed.",
         default=None,
     )
     current: Optional[float] = Field(
