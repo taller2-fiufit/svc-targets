@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from httpx import AsyncClient
 from typing import AsyncGenerator, Generator
 from http import HTTPStatus
+from src.common import TargetType
 
 from src.test_utils import assert_returns_empty
 from src.auth import get_admin, get_user, ignore_auth
@@ -58,10 +59,10 @@ async def created_body(client: AsyncClient) -> Target:
     body = CreateTarget(
         name="name",
         description="description",
+        type=TargetType.DISTANCE_TRAVELLED,
         limit=int((datetime.now() + timedelta(days=1)).timestamp()) * 1000,
         current=0.0,
         target=1.0,
-        unit="Kms",
         multimedia=[Multimedia("url1"), Multimedia("url2")],
     )
 

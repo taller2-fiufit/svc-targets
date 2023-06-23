@@ -52,9 +52,15 @@ def modifies_expired(target: DBTarget, patch: PatchTarget) -> bool:
     if patch.limit is not None and patch.limit // 1000 != target.limit:
         return False
 
-    curr_was_modified = patch.current is not None and patch.current != target.current
-    targ_was_modified = patch.target is not None and patch.target != target.target
-    return limit_is_expired(target.limit) and (curr_was_modified or targ_was_modified)
+    curr_was_modified = (
+        patch.current is not None and patch.current != target.current
+    )
+    targ_was_modified = (
+        patch.target is not None and patch.target != target.target
+    )
+    return limit_is_expired(target.limit) and (
+        curr_was_modified or targ_was_modified
+    )
 
 
 async def patch_target(

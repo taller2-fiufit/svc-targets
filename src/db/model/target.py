@@ -1,5 +1,6 @@
 from typing import List, Optional
 from sqlalchemy import (
+    Enum,
     Float,
     ForeignKey,
     Integer,
@@ -9,7 +10,7 @@ from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from src.api.model.target import CreateTarget, Multimedia, Target
 from src.db.model.base import Base
-from src.common import limit_is_expired
+from src.common import TargetType, limit_is_expired
 
 
 class DBMultimedia(Base):
@@ -37,10 +38,10 @@ class DBTarget(Base):
     author: Mapped[int] = mapped_column(Integer)
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
+    type: Mapped[TargetType] = mapped_column(Enum(TargetType))
     limit: Mapped[int] = mapped_column(Integer)  # in seconds
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
-    unit: Mapped[str] = mapped_column(String(30))
     multimedia: Mapped[List[DBMultimedia]] = relationship(
         cascade="all, delete-orphan",
         lazy="immediate",
@@ -73,10 +74,10 @@ class DBTarget(Base):
             id=self.id,
             name=self.name,
             description=self.description,
+            type=self.type,
             limit=self.limit * 1000,  # to ms
             current=self.current,
             target=self.target,
-            unit=self.unit,
             multimedia=multimedia,
             completed=self.current == self.target,
             expired=limit_is_expired(self.limit),
@@ -86,10 +87,10 @@ class DBTarget(Base):
         self,
         name: Optional[str] = None,
         description: Optional[str] = None,
+        type: Optional[TargetType] = None,
         limit: Optional[int] = None,
         current: Optional[float] = None,
         target: Optional[float] = None,
-        unit: Optional[str] = None,
         multimedia: Optional[List[Multimedia]] = None,
     ) -> None:
         """Conditionally updates the targets attributes."""
@@ -97,14 +98,14 @@ class DBTarget(Base):
             self.name = name
         if description is not None:
             self.description = description
+        if type is not None:
+            self.type = type
         if limit is not None:
             self.limit = limit // 1000  # from ms
         if current is not None:
             self.current = current
         if target is not None:
             self.target = target
-        if unit is not None:
-            self.unit = unit
         if multimedia is not None:
             self.multimedia = multimedia_api_to_db(multimedia)
 
