@@ -6,9 +6,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.middleware import Middleware
 
 from src.logging import info
 from src.db.migration import upgrade_db
+from src.auth import ApikeyMiddleware
 
 
 @asynccontextmanager
@@ -28,6 +30,7 @@ app = FastAPI(
     version="0.1.0",
     description="Kinetix's targets service API",
     docs_url=None,
+    middleware=[Middleware(ApikeyMiddleware)],
 )
 
 
