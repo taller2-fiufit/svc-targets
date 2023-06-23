@@ -77,7 +77,7 @@ class ApikeyMiddleware:
         apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
 
         if not req_apikey_is_valid(apikey) and scope["path"] != "/health":
-            response = Response(status_code=HTTPStatus.IM_A_TEAPOT)
+            response = Response(status_code=HTTPStatus.UNAUTHORIZED)
             await response(scope, receive, send)
             return
 
