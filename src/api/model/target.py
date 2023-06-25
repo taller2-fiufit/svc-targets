@@ -33,9 +33,9 @@ class TargetBase(OrmModel):
         "If it counts distance travelled, time spent, etc.",
         default=None,
     )
-    limit: Optional[int] = Field(
+    limit: Optional[str] = Field(
         title="Time limit",
-        description="The target's time limit in milliseconds. "
+        description="The target's time limit in ISO format. "
         "After this date, the target can't be completed.",
         default=None,
     )

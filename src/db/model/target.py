@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import List, Optional
 from sqlalchemy import (
+    DateTime,
     Enum,
     Float,
     ForeignKey,
@@ -39,7 +41,7 @@ class DBTarget(Base):
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
     type: Mapped[TargetType] = mapped_column(Enum(TargetType))
-    limit: Mapped[int] = mapped_column(Integer)  # in seconds
+    limit: Mapped[datetime] = mapped_column(DateTime)
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
     multimedia: Mapped[List[DBMultimedia]] = relationship(
@@ -59,9 +61,11 @@ class DBTarget(Base):
 
         db_multimedia = multimedia_api_to_db(target.multimedia)
 
+        limit = datetime.fromisoformat(target.limit)
+
         kwargs = {
             **target.dict(),
-            "limit": target.limit // 1000,  # from ms
+            "limit": limit,
             "multimedia": db_multimedia,
         }
 
@@ -75,7 +79,7 @@ class DBTarget(Base):
             name=self.name,
             description=self.description,
             type=self.type,
-            limit=self.limit * 1000,  # to ms
+            limit=self.limit.isoformat(),
             current=self.current,
             target=self.target,
             multimedia=multimedia,
@@ -88,7 +92,7 @@ class DBTarget(Base):
         name: Optional[str] = None,
         description: Optional[str] = None,
         type: Optional[TargetType] = None,
-        limit: Optional[int] = None,
+        limit: Optional[str] = None,
         current: Optional[float] = None,
         target: Optional[float] = None,
         multimedia: Optional[List[Multimedia]] = None,
@@ -101,7 +105,7 @@ class DBTarget(Base):
         if type is not None:
             self.type = type
         if limit is not None:
-            self.limit = limit // 1000  # from ms
+            self.limit = datetime.fromisoformat(limit)
         if current is not None:
             self.current = current
         if target is not None:

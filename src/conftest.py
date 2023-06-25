@@ -61,7 +61,7 @@ async def created_target(client: AsyncClient) -> Target:
         name="name",
         description="description",
         type=TargetType.DISTANCE_TRAVELLED,
-        limit=int((datetime.now() + timedelta(days=1)).timestamp()) * 1000,
+        limit=(datetime.now() + timedelta(days=1)).isoformat(),
         current=0.0,
         target=1.0,
         multimedia=[Multimedia("url1"), Multimedia("url2")],

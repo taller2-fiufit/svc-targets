@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from httpx import AsyncClient
 from http import HTTPStatus
@@ -133,7 +133,7 @@ async def test_cannot_modify_expired_target(
     created_target: Target, client: AsyncClient
 ) -> None:
     body = PatchTarget(**created_target.dict())
-    body.limit = int((datetime.now().timestamp() - 9) * 1000)
+    body.limit = (datetime.now() - timedelta(minutes=5)).isoformat()
 
     response = await client.patch("/targets/1", json=body.dict())
     assert response.json()["expired"]

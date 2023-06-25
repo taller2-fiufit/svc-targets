@@ -2,8 +2,8 @@ import enum
 from datetime import datetime
 
 
-def limit_is_expired(limit: int) -> bool:
-    return limit <= datetime.now().timestamp()
+def limit_is_expired(limit: datetime) -> bool:
+    return limit <= datetime.now()
 
 
 class TargetType(enum.StrEnum):
