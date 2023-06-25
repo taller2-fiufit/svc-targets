@@ -41,7 +41,7 @@ class DBTarget(Base):
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
     type: Mapped[TargetType] = mapped_column(Enum(TargetType))
-    limit: Mapped[datetime] = mapped_column(DateTime)
+    limit: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
     multimedia: Mapped[List[DBMultimedia]] = relationship(
