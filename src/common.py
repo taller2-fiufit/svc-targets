@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def limit_is_expired(limit: datetime) -> bool:
-    return limit <= datetime.now()
+    return limit <= datetime.utcnow()
 
 
 class TargetType(enum.StrEnum):
