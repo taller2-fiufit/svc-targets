@@ -1,5 +1,8 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy import (
+    DateTime,
+    Enum,
     Float,
     ForeignKey,
     Integer,
@@ -9,7 +12,7 @@ from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from src.api.model.target import CreateTarget, Multimedia, Target
 from src.db.model.base import Base
-from src.common import limit_is_expired
+from src.common import TargetType, limit_is_expired
 
 
 class DBMultimedia(Base):
@@ -37,10 +40,10 @@ class DBTarget(Base):
     author: Mapped[int] = mapped_column(Integer)
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
-    limit: Mapped[int] = mapped_column(Integer)  # in seconds
+    type: Mapped[TargetType] = mapped_column(Enum(TargetType))
+    limit: Mapped[datetime] = mapped_column(DateTime)
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
-    unit: Mapped[str] = mapped_column(String(30))
     multimedia: Mapped[List[DBMultimedia]] = relationship(
         cascade="all, delete-orphan",
         lazy="immediate",
@@ -60,36 +63,45 @@ class DBTarget(Base):
 
         kwargs = {
             **target.dict(),
-            "limit": target.limit // 1000,  # from ms
+            "limit": target.get_limit(),
             "multimedia": db_multimedia,
         }
 
         return cls(author=author, **kwargs)
 
+    def get_naive_limit(self) -> datetime:
+        return self.limit.replace(tzinfo=None)
+
+    def get_aware_limit(self) -> datetime:
+        return self.limit.replace(tzinfo=timezone.utc)
+
     def to_api_model(self) -> Target:
         multimedia = multimedia_db_to_api(self.multimedia)
+
+        limit = self.get_aware_limit().isoformat()
+        expired = limit_is_expired(self.get_naive_limit())
 
         return Target(
             id=self.id,
             name=self.name,
             description=self.description,
-            limit=self.limit * 1000,  # to ms
+            type=self.type,
+            limit=limit,
             current=self.current,
             target=self.target,
-            unit=self.unit,
             multimedia=multimedia,
             completed=self.current == self.target,
-            expired=limit_is_expired(self.limit),
+            expired=expired,
         )
 
     def update(
         self,
         name: Optional[str] = None,
         description: Optional[str] = None,
-        limit: Optional[int] = None,
+        type: Optional[TargetType] = None,
+        limit: Optional[str] = None,
         current: Optional[float] = None,
         target: Optional[float] = None,
-        unit: Optional[str] = None,
         multimedia: Optional[List[Multimedia]] = None,
     ) -> None:
         """Conditionally updates the targets attributes."""
@@ -97,14 +109,15 @@ class DBTarget(Base):
             self.name = name
         if description is not None:
             self.description = description
+        if type is not None:
+            self.type = type
         if limit is not None:
-            self.limit = limit // 1000  # from ms
+            date = datetime.fromisoformat(limit).astimezone(tz=timezone.utc)
+            self.limit = date.replace(tzinfo=None)
         if current is not None:
             self.current = current
         if target is not None:
             self.target = target
-        if unit is not None:
-            self.unit = unit
         if multimedia is not None:
             self.multimedia = multimedia_api_to_db(multimedia)
 

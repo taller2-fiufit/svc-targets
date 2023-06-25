@@ -1,7 +1,9 @@
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import Query
 from pydantic import BaseModel, ConstrainedStr, Field, root_validator
 from src.api.model.utils import OrmModel, make_all_required
+from src.common import TargetType
 
 
 class Multimedia(ConstrainedStr):
@@ -26,9 +28,15 @@ class TargetBase(OrmModel):
         max_length=300,
         default=None,
     )
-    limit: Optional[int] = Field(
+    type: Optional[TargetType] = Field(
+        title="Type",
+        description="The target's type. "
+        "If it counts distance travelled, time spent, etc.",
+        default=None,
+    )
+    limit: Optional[str] = Field(
         title="Time limit",
-        description="The target's time limit in milliseconds. "
+        description="The target's time limit in ISO format. "
         "After this date, the target can't be completed.",
         default=None,
     )
@@ -46,19 +54,21 @@ class TargetBase(OrmModel):
         ge=0.0,
         default=None,
     )
-    unit: Optional[str] = Field(
-        title="Unit",
-        description="The target's progress unit. "
-        "E.g.: 'kg', 'km', 'm', 'cm', 'h', 'min', 's', etc.",
-        max_length=30,
-        default=None,
-    )
     multimedia: Optional[List[Multimedia]] = Field(
         title="Multimedia resources",
         description="The target's multimedia resources (images or videos)",
         max_items=4,
         default=None,
     )
+
+    def get_limit(self) -> Optional[datetime]:
+        if self.limit is None:
+            return None
+        return (
+            datetime.fromisoformat(self.limit)
+            .astimezone(tz=timezone.utc)
+            .replace(tzinfo=None)
+        )
 
 
 class AllRequiredTargetBase(TargetBase):
@@ -89,11 +99,11 @@ class Target(AllRequiredTargetBase):
     id: int = Field(title="ID", description="The target's ID")
     completed: bool = Field(
         title="Was completed?",
-        description="True if the target was completed, false otherwise."
+        description="True if the target was completed, false otherwise.",
     )
     expired: bool = Field(
         title="Is it expired?",
-        description="True if the target reached its time limit, false otherwise."
+        description="True if the target reached its time limit, false otherwise.",
     )
 
 
