@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 from typing import List
 from fastapi import HTTPException
@@ -11,7 +12,7 @@ from src.api.model.target import (
     Target,
 )
 from src.db.model.target import DBTarget
-from src.common import limit_is_expired
+from src.common import TargetType, limit_is_expired
 
 
 async def get_all_targets(
@@ -107,3 +108,20 @@ async def delete_target(session: AsyncSession, author: int, id: int) -> Target:
     await session.delete(target)
 
     return target.to_api_model()
+
+
+async def update_targets(
+    session: AsyncSession, author: int, type: TargetType, count: float
+) -> None:
+    """Updates the targets with the given type and author by the given count"""
+    now = datetime.utcnow()
+    query = (
+        select(DBTarget)
+        .filter_by(author=author, type=type)
+        .filter(DBTarget.limit > now)
+    )
+    res = await session.scalars(query)
+
+    for target in res:
+        target.current = min(target.current + count, target.target)
+        session.add(target)

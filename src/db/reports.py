@@ -10,6 +10,7 @@ from src.api.model.report import (
 )
 from src.common import TargetType
 from src.db.model.report import DBReport
+import src.db.targets as targets_db
 
 
 async def get_reports(
@@ -40,6 +41,12 @@ async def create_report(
     session: AsyncSession, author: int, report: CreateReport
 ) -> Report:
     new_report = DBReport(**report.dict(), author=author)
+
+    # to reassure mypy
+    assert report.type is not None
+    assert report.count is not None
+
+    await targets_db.update_targets(session, author, report.type, report.count)
 
     session.add(new_report)
     await session.commit()
