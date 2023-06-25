@@ -41,7 +41,7 @@ class DBTarget(Base):
     name: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(String(300))
     type: Mapped[TargetType] = mapped_column(Enum(TargetType))
-    limit: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    limit: Mapped[datetime] = mapped_column(DateTime)
     current: Mapped[float] = mapped_column(Float(9))
     target: Mapped[float] = mapped_column(Float(9))
     multimedia: Mapped[List[DBMultimedia]] = relationship(
@@ -61,30 +61,37 @@ class DBTarget(Base):
 
         db_multimedia = multimedia_api_to_db(target.multimedia)
 
-        limit = datetime.fromisoformat(target.limit)
-
         kwargs = {
             **target.dict(),
-            "limit": limit,
+            "limit": target.get_limit(),
             "multimedia": db_multimedia,
         }
 
         return cls(author=author, **kwargs)
 
+    def get_naive_limit(self) -> datetime:
+        return self.limit.replace(tzinfo=None)
+
+    def get_aware_limit(self) -> datetime:
+        return self.limit.replace(tzinfo=timezone.utc)
+
     def to_api_model(self) -> Target:
         multimedia = multimedia_db_to_api(self.multimedia)
+
+        limit = self.get_aware_limit().isoformat()
+        expired = limit_is_expired(self.get_naive_limit())
 
         return Target(
             id=self.id,
             name=self.name,
             description=self.description,
             type=self.type,
-            limit=self.limit.astimezone(tz=timezone.utc).isoformat(),
+            limit=limit,
             current=self.current,
             target=self.target,
             multimedia=multimedia,
             completed=self.current == self.target,
-            expired=limit_is_expired(self.limit),
+            expired=expired,
         )
 
     def update(
@@ -105,7 +112,8 @@ class DBTarget(Base):
         if type is not None:
             self.type = type
         if limit is not None:
-            self.limit = datetime.fromisoformat(limit)
+            date = datetime.fromisoformat(limit).astimezone(tz=timezone.utc)
+            self.limit = date.replace(tzinfo=None)
         if current is not None:
             self.current = current
         if target is not None:

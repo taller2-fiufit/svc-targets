@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import Query
 from pydantic import BaseModel, Field
@@ -44,3 +45,21 @@ class ReportParams(BaseModel):
     )
     start: Optional[str] = Field(Query(None, title="Query start date"))
     end: Optional[str] = Field(Query(None, title="Query end date"))
+
+    def get_start(self) -> Optional[datetime]:
+        if self.start is None:
+            return None
+        return (
+            datetime.fromisoformat(self.start)
+            .astimezone(tz=timezone.utc)
+            .replace(tzinfo=None)
+        )
+
+    def get_end(self) -> Optional[datetime]:
+        if self.end is None:
+            return None
+        return (
+            datetime.fromisoformat(self.end)
+            .astimezone(tz=timezone.utc)
+            .replace(tzinfo=None)
+        )

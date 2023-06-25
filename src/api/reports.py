@@ -7,7 +7,6 @@ from src.api.aliases import SessionDep, UserDep
 from src.auth import get_user
 from src.db.utils import get_session
 from src.logging import info
-from datetime import datetime, timezone
 import src.db.reports as reports_db
 
 
@@ -29,22 +28,12 @@ async def get_reports(
     f: Filters,
 ) -> List[Report]:
     """Get all the user's reports"""
-    start = (
-        datetime.fromisoformat(f.start).astimezone(tz=timezone.utc)
-        if f.start
-        else None
-    )
-    end = (
-        datetime.fromisoformat(f.end).astimezone(tz=timezone.utc)
-        if f.end
-        else None
-    )
     return await reports_db.get_reports(
         session,
         user.sub,
         f.type,
-        start,
-        end,
+        f.get_start(),
+        f.get_end(),
     )
 
 

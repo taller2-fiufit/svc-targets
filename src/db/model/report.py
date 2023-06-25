@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     DateTime,
     Enum,
@@ -19,13 +19,11 @@ class DBReport(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     author: Mapped[int] = mapped_column(Integer)
     type: Mapped[TargetType] = mapped_column(Enum(TargetType))
-    date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
-    )
+    date: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     count: Mapped[float] = mapped_column(Float(9))
 
     def to_api(self) -> Report:
-        date = self.date.replace(tzinfo=None)
+        date = self.date.replace(tzinfo=timezone.utc)
         return Report(
             type=self.type,
             count=self.count,

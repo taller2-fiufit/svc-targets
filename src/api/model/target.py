@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import Query
 from pydantic import BaseModel, ConstrainedStr, Field, root_validator
@@ -59,6 +60,15 @@ class TargetBase(OrmModel):
         max_items=4,
         default=None,
     )
+
+    def get_limit(self) -> Optional[datetime]:
+        if self.limit is None:
+            return None
+        return (
+            datetime.fromisoformat(self.limit)
+            .astimezone(tz=timezone.utc)
+            .replace(tzinfo=None)
+        )
 
 
 class AllRequiredTargetBase(TargetBase):

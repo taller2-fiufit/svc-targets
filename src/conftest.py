@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from httpx import AsyncClient
 from typing import AsyncGenerator, Generator
 from http import HTTPStatus
@@ -61,7 +61,7 @@ async def created_target(client: AsyncClient) -> Target:
         name="name",
         description="description",
         type=TargetType.DISTANCE_TRAVELLED,
-        limit=(datetime.now() + timedelta(days=1)).isoformat(),
+        limit=(datetime.now(tz=timezone.utc) + timedelta(days=1)).isoformat(),
         current=0.0,
         target=1.0,
         multimedia=[Multimedia("url1"), Multimedia("url2")],
@@ -95,7 +95,7 @@ async def check_empty_reports(client: AsyncClient) -> None:
 @pytest.fixture
 async def created_report(client: AsyncClient) -> Report:
     # backend uses UTC and without milliseconds
-    start = datetime.utcnow().replace(microsecond=0)
+    start = datetime.now(timezone.utc).replace(microsecond=0)
 
     body = CreateReport(
         type=TargetType.DISTANCE_TRAVELLED,
@@ -115,7 +115,7 @@ async def created_report(client: AsyncClient) -> Report:
     report = Report(**json)
 
     got_date = datetime.fromisoformat(report.date)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     assert start <= got_date <= now
 

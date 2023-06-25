@@ -1,9 +1,9 @@
 import enum
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 def limit_is_expired(limit: datetime) -> bool:
-    return limit.astimezone(tz=timezone.utc) <= datetime.utcnow()
+    return limit <= datetime.utcnow()
 
 
 class TargetType(enum.StrEnum):

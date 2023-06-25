@@ -33,7 +33,7 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
-        sa.Column("date", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("date", sa.DateTime(timezone=False), nullable=False),
         sa.Column("count", sa.Float(precision=9), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -59,7 +59,7 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
-        sa.Column("limit", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("limit", sa.DateTime(timezone=False), nullable=False),
         sa.Column("current", sa.Float(precision=9), nullable=False),
         sa.Column("target", sa.Float(precision=9), nullable=False),
         sa.PrimaryKeyConstraint("id"),
