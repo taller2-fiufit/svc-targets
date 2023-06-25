@@ -3,6 +3,7 @@ from httpx import AsyncClient
 from http import HTTPStatus
 
 from src.api.model.report import Report
+from src.api.model.target import Target
 from src.common import TargetType
 
 
@@ -79,3 +80,26 @@ async def test_reports_date_filters(
     got = Report(**json[0])
 
     assert got == created_report
+
+
+async def test_report_and_target_post_get(
+    check_empty_reports: None,
+    created_target: Target,  # first
+    created_report: Report,  # second
+    client: AsyncClient,
+) -> None:
+    response = await client.get("/targets")
+    assert response.status_code == HTTPStatus.OK
+    json = response.json()
+    assert len(json) == 1
+
+    got = Target(**json[0])
+
+    # reassure mypy
+    assert created_target.current is not None
+    assert created_report.count is not None
+
+    updated_count = created_target.current + created_report.count
+
+    assert got.current == updated_count
+    assert got.completed == (updated_count == created_target.target)
