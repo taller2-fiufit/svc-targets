@@ -2,6 +2,7 @@ from httpx import AsyncClient
 from http import HTTPStatus
 
 from src.api.model.report import Report
+from src.common import TargetType
 
 
 async def test_reports_get_empty(check_empty_reports: None) -> None:
@@ -23,6 +24,28 @@ async def test_reports_post_get(
     check_empty_reports: None, created_report: Report, client: AsyncClient
 ) -> None:
     response = await client.get("/reports")
+    assert response.status_code == HTTPStatus.OK
+    json = response.json()
+    assert len(json) == 1
+
+    got = Report(**json[0])
+
+    assert got == created_report
+
+
+async def test_reports_type_filters(
+    check_empty_reports: None, created_report: Report, client: AsyncClient
+) -> None:
+    other_type = TargetType.TIME_SPENT
+    assert created_report.type != other_type
+    response = await client.get("/reports", params={"type": str(other_type)})
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == []
+
+    response = await client.get(
+        "/reports", params={"type": str(created_report.type)}
+    )
     assert response.status_code == HTTPStatus.OK
     json = response.json()
     assert len(json) == 1

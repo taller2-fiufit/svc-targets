@@ -29,8 +29,8 @@ async def get_reports(
     f: Filters,
 ) -> List[Report]:
     """Get all the user's reports"""
-    start = datetime.fromtimestamp(f.start / 1000) if f.start else None
-    end = datetime.fromtimestamp(f.end / 1000) if f.end else None
+    start = datetime.fromisoformat(f.start) if f.start else None
+    end = datetime.fromisoformat(f.end) if f.end else None
     return await reports_db.get_reports(
         session,
         user.sub,

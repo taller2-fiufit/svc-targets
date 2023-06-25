@@ -26,5 +26,5 @@ class DBReport(Base):
         return Report(
             type=self.type,
             count=self.count,
-            date=int(self.date.timestamp() * 1000),
+            date=self.date.isoformat(),
         )

@@ -32,10 +32,9 @@ class CreateReport(AllRequiredReportBase):
 
 
 class Report(AllRequiredReportBase):
-    date: int = Field(
+    date: str = Field(
         title="Date",
-        description="The date when the report was created, in milliseconds.",
-        ge=0,
+        description="The date when the report was created.",
     )
 
 
@@ -43,5 +42,5 @@ class ReportParams(BaseModel):
     type: Optional[TargetType] = Field(
         Query(None, title="Type of the metric that's being queried")
     )
-    start: Optional[int] = Field(Query(None, title="Query start date"))
-    end: Optional[int] = Field(Query(None, title="Query end date"))
+    start: Optional[str] = Field(Query(None, title="Query start date"))
+    end: Optional[str] = Field(Query(None, title="Query end date"))

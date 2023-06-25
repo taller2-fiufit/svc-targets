@@ -114,7 +114,7 @@ async def created_report(client: AsyncClient) -> Report:
 
     report = Report(**json)
 
-    got_date = datetime.fromtimestamp(report.date // 1000)
+    got_date = datetime.fromisoformat(report.date)
     now = datetime.utcnow()
 
     assert start <= got_date <= now
