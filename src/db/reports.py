@@ -15,11 +15,14 @@ from src.db.model.report import DBReport
 async def get_reports(
     session: AsyncSession,
     user: int,
-    type: TargetType,
+    type: Optional[TargetType],
     start: Optional[datetime],
     end: Optional[datetime],
 ) -> List[Report]:
-    query = select(DBReport).filter_by(author=user, type=type)
+    query = select(DBReport).filter_by(author=user)
+
+    if type is not None:
+        query = query.filter_by(type=type)
 
     if start is not None:
         query = query.filter(DBReport.date >= start)
@@ -30,7 +33,7 @@ async def get_reports(
     res = await session.scalars(query)
     reports = res.all()
 
-    return list(map(Report.from_orm, reports))
+    return list(map(DBReport.to_api, reports))
 
 
 async def create_report(
@@ -41,4 +44,5 @@ async def create_report(
     session.add(new_report)
     await session.commit()
 
-    return Report.from_orm(new_report)
+    print(new_report.date)
+    return new_report.to_api()

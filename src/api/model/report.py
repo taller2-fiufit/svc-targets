@@ -6,6 +6,12 @@ from src.common import TargetType
 
 
 class ReportBase(OrmModel):
+    type: Optional[TargetType] = Field(
+        title="Type",
+        description="The reported metric's type. "
+        "If it counts distance travelled, time spent, etc.",
+        default=None,
+    )
     count: Optional[float] = Field(
         title="Counted progress",
         description="The progress counted by the report.",
@@ -22,12 +28,7 @@ make_all_required(AllRequiredReportBase)
 
 
 class CreateReport(AllRequiredReportBase):
-    type: TargetType = Field(
-        title="Type",
-        description="The reported metric's type. "
-        "If it counts distance travelled, time spent, etc.",
-        default=None,
-    )
+    pass
 
 
 class Report(AllRequiredReportBase):
@@ -39,8 +40,8 @@ class Report(AllRequiredReportBase):
 
 
 class ReportParams(BaseModel):
-    type: TargetType = Field(
-        Query(title="Type of the metric that's being queried")
+    type: Optional[TargetType] = Field(
+        Query(None, title="Type of the metric that's being queried")
     )
     start: Optional[int] = Field(Query(None, title="Query start date"))
     end: Optional[int] = Field(Query(None, title="Query end date"))

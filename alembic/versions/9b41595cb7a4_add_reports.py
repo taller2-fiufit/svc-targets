@@ -1,8 +1,8 @@
 """add reports
 
-Revision ID: 9c7d02ad40e2
+Revision ID: 9b41595cb7a4
 Revises: 93ce878ad451
-Create Date: 2023-06-24 21:19:09.823886
+Create Date: 2023-06-24 21:45:46.726464
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "9c7d02ad40e2"
+revision = "9b41595cb7a4"
 down_revision = "93ce878ad451"
 branch_labels = None
 depends_on = None
@@ -33,7 +33,7 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
-        sa.Column("date", sa.DateTime(), nullable=False),
+        sa.Column("date", sa.DateTime(timezone=True), nullable=False),
         sa.Column("count", sa.Float(precision=9), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )

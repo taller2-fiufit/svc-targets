@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from httpx import AsyncClient
 from typing import AsyncGenerator, Generator
 from http import HTTPStatus
+from src.api.model.report import CreateReport, Report
 from src.common import TargetType
 
 from src.test_utils import assert_returns_empty
@@ -45,7 +46,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 
 # -----------------
-# TRAINING FIXTURES
+# TARGET FIXTURES
 # -----------------
 
 
@@ -55,7 +56,7 @@ async def check_empty_targets(client: AsyncClient) -> None:
 
 
 @pytest.fixture
-async def created_body(client: AsyncClient) -> Target:
+async def created_target(client: AsyncClient) -> Target:
     body = CreateTarget(
         name="name",
         description="description",
@@ -79,3 +80,43 @@ async def created_body(client: AsyncClient) -> Target:
     assert not json["expired"]
 
     return Target(**json)
+
+
+# -----------------
+# REPORT FIXTURES
+# -----------------
+
+
+@pytest.fixture
+async def check_empty_reports(client: AsyncClient) -> None:
+    await assert_returns_empty(client, "/reports")
+
+
+@pytest.fixture
+async def created_report(client: AsyncClient) -> Report:
+    # backend doesn't save milliseconds and uses UTC time
+    start = datetime.utcnow().replace(microsecond=0)
+
+    body = CreateReport(
+        type=TargetType.DISTANCE_TRAVELLED,
+        count=1.0,
+    )
+
+    response = await client.post("/reports", json=body.dict())
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    json = response.json()
+
+    result = CreateReport(**json)
+
+    assert result == body
+
+    report = Report(**json)
+
+    got_date = datetime.fromtimestamp(report.date // 1000)
+    now = datetime.utcnow()
+
+    assert start <= got_date <= now
+
+    return report
