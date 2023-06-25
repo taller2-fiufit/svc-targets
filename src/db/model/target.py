@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy import (
     DateTime,
@@ -79,7 +79,7 @@ class DBTarget(Base):
             name=self.name,
             description=self.description,
             type=self.type,
-            limit=self.limit.isoformat(),
+            limit=self.limit.astimezone(tz=timezone.utc).isoformat(),
             current=self.current,
             target=self.target,
             multimedia=multimedia,
