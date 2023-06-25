@@ -34,7 +34,7 @@ class CreateReport(AllRequiredReportBase):
 class Report(AllRequiredReportBase):
     date: str = Field(
         title="Date",
-        description="The date when the report was created.",
+        description="The date when the report was created (in UTC).",
     )
 
 

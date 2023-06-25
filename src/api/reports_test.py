@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from httpx import AsyncClient
 from http import HTTPStatus
 
@@ -46,6 +47,31 @@ async def test_reports_type_filters(
     response = await client.get(
         "/reports", params={"type": str(created_report.type)}
     )
+    assert response.status_code == HTTPStatus.OK
+    json = response.json()
+    assert len(json) == 1
+
+    got = Report(**json[0])
+
+    assert got == created_report
+
+
+async def test_reports_date_filters(
+    check_empty_reports: None, created_report: Report, client: AsyncClient
+) -> None:
+    # [start, end] doesn't include created_report.date
+    start = datetime.utcnow() - timedelta(minutes=10)
+    end = datetime.utcnow() - timedelta(minutes=5)
+    params = {"start": start.isoformat(), "end": end.isoformat()}
+    response = await client.get("/reports", params=params)
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == []
+
+    # [start, end] does include created_report.date
+    params["end"] = datetime.utcnow().isoformat()
+
+    response = await client.get("/reports", params=params)
     assert response.status_code == HTTPStatus.OK
     json = response.json()
     assert len(json) == 1

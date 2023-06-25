@@ -44,5 +44,4 @@ async def create_report(
     session.add(new_report)
     await session.commit()
 
-    print(new_report.date)
     return new_report.to_api()

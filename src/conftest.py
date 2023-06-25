@@ -94,7 +94,7 @@ async def check_empty_reports(client: AsyncClient) -> None:
 
 @pytest.fixture
 async def created_report(client: AsyncClient) -> Report:
-    # backend doesn't save milliseconds and uses UTC time
+    # backend uses UTC and without milliseconds
     start = datetime.utcnow().replace(microsecond=0)
 
     body = CreateReport(

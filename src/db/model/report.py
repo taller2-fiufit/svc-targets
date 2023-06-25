@@ -23,8 +23,9 @@ class DBReport(Base):
     count: Mapped[float] = mapped_column(Float(9))
 
     def to_api(self) -> Report:
+        date = self.date.replace(tzinfo=None)
         return Report(
             type=self.type,
             count=self.count,
-            date=self.date.isoformat(),
+            date=date.isoformat(),
         )
