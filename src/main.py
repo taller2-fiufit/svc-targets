@@ -59,8 +59,10 @@ app.add_middleware(
 def add_subrouters(app: FastAPI) -> None:
     """Set up subrouters"""
     from src.api.targets import router as targets_router
+    from src.api.reports import router as reports_router
 
     app.include_router(targets_router)
+    app.include_router(reports_router)
 
 
 add_subrouters(app)

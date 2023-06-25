@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from httpx import AsyncClient
 from http import HTTPStatus
@@ -22,8 +22,8 @@ async def test_targets_get_nonexistent(client: AsyncClient) -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-async def test_targets_post(created_body: Target) -> None:
-    # NOTE: all checks are located inside the created_body fixture
+async def test_targets_post(created_target: Target) -> None:
+    # NOTE: all checks are located inside the created_target fixture
     pass
 
 
@@ -33,7 +33,7 @@ async def test_targets_post_no_body(client: AsyncClient) -> None:
 
 
 async def test_targets_post_get(
-    check_empty_targets: None, created_body: Target, client: AsyncClient
+    check_empty_targets: None, created_target: Target, client: AsyncClient
 ) -> None:
     response = await client.get("/targets")
     assert response.status_code == HTTPStatus.OK
@@ -42,7 +42,7 @@ async def test_targets_post_get(
 
     got = Target(**json[0])
 
-    assert got == created_body
+    assert got == created_target
 
     response = await client.get(f"/targets/{got.id}")
     assert response.status_code == HTTPStatus.OK
@@ -50,22 +50,22 @@ async def test_targets_post_get(
 
 
 async def test_targets_patch(
-    created_body: Target, client: AsyncClient
+    created_target: Target, client: AsyncClient
 ) -> None:
-    created_body.description = "new description"
-    created_body.current = created_body.target
-    body = PatchTarget(**created_body.dict())
+    created_target.description = "new description"
+    created_target.current = created_target.target
+    body = PatchTarget(**created_target.dict())
 
     response = await client.patch(
-        f"/targets/{created_body.id}", json=body.dict()
+        f"/targets/{created_target.id}", json=body.dict()
     )
     assert response.status_code == HTTPStatus.OK
 
     got = Target(**response.json())
 
-    created_body.completed = True
+    created_target.completed = True
 
-    assert got == created_body
+    assert got == created_target
 
     response = await client.get(f"/targets/{got.id}")
     assert response.status_code == HTTPStatus.OK
@@ -73,14 +73,14 @@ async def test_targets_patch(
 
 
 async def test_targets_delete(
-    created_body: Target, client: AsyncClient
+    created_target: Target, client: AsyncClient
 ) -> None:
-    response = await client.delete(f"/targets/{created_body.id}")
+    response = await client.delete(f"/targets/{created_target.id}")
     assert response.status_code == HTTPStatus.OK
 
     got = Target(**response.json())
 
-    assert got == created_body
+    assert got == created_target
 
     await assert_returns_empty(client, "/targets")
 
@@ -94,9 +94,9 @@ async def assert_invalid(body: dict[str, Any], client: AsyncClient) -> None:
 
 
 async def test_targets_invalid_body(
-    created_body: Target, client: AsyncClient
+    created_target: Target, client: AsyncClient
 ) -> None:
-    body = CreateTarget(**created_body.dict())
+    body = CreateTarget(**created_target.dict())
     assert body.target is not None
     body.name = "other name"
 
@@ -130,10 +130,10 @@ async def test_targets_invalid_body(
 
 
 async def test_cannot_modify_expired_target(
-        created_body: Target, client: AsyncClient
+    created_target: Target, client: AsyncClient
 ) -> None:
-    body = PatchTarget(**created_body.dict())
-    body.limit = int((datetime.now().timestamp() - 9) * 1000)
+    body = PatchTarget(**created_target.dict())
+    body.limit = (datetime.now() - timedelta(minutes=5)).isoformat()
 
     response = await client.patch("/targets/1", json=body.dict())
     assert response.json()["expired"]

@@ -1,9 +1,11 @@
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from httpx import AsyncClient
 from typing import AsyncGenerator, Generator
 from http import HTTPStatus
+from src.api.model.report import CreateReport, Report
+from src.common import TargetType
 
 from src.test_utils import assert_returns_empty
 from src.auth import get_admin, get_user, ignore_auth
@@ -44,7 +46,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 
 # -----------------
-# TRAINING FIXTURES
+# TARGET FIXTURES
 # -----------------
 
 
@@ -54,14 +56,14 @@ async def check_empty_targets(client: AsyncClient) -> None:
 
 
 @pytest.fixture
-async def created_body(client: AsyncClient) -> Target:
+async def created_target(client: AsyncClient) -> Target:
     body = CreateTarget(
         name="name",
         description="description",
-        limit=int((datetime.now() + timedelta(days=1)).timestamp()) * 1000,
+        type=TargetType.DISTANCE_TRAVELLED,
+        limit=(datetime.now(tz=timezone.utc) + timedelta(days=1)).isoformat(),
         current=0.0,
         target=1.0,
-        unit="Kms",
         multimedia=[Multimedia("url1"), Multimedia("url2")],
     )
 
@@ -78,3 +80,43 @@ async def created_body(client: AsyncClient) -> Target:
     assert not json["expired"]
 
     return Target(**json)
+
+
+# -----------------
+# REPORT FIXTURES
+# -----------------
+
+
+@pytest.fixture
+async def check_empty_reports(client: AsyncClient) -> None:
+    await assert_returns_empty(client, "/reports")
+
+
+@pytest.fixture
+async def created_report(client: AsyncClient) -> Report:
+    # backend uses UTC and without milliseconds
+    start = datetime.now(timezone.utc).replace(microsecond=0)
+
+    body = CreateReport(
+        type=TargetType.DISTANCE_TRAVELLED,
+        count=1.0,
+    )
+
+    response = await client.post("/reports", json=body.dict())
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    json = response.json()
+
+    result = CreateReport(**json)
+
+    assert result == body
+
+    report = Report(**json)
+
+    got_date = datetime.fromisoformat(report.date)
+    now = datetime.now(timezone.utc)
+
+    assert start <= got_date <= now
+
+    return report
