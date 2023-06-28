@@ -29,7 +29,11 @@ make_all_required(AllRequiredReportBase)
 
 
 class CreateReport(AllRequiredReportBase):
-    pass
+    token: str = Field(
+        title="Notifications token",
+        description="A valid token for Expo's notifications API.",
+        max_length=255,
+    )
 
 
 class Report(AllRequiredReportBase):
