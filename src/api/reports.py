@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from typing import List, Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.api.model.report import CreateReport, Report, ReportParams
 from src.api.aliases import SessionDep, UserDep
@@ -19,6 +19,10 @@ router = APIRouter(
 )
 
 Filters = Annotated[ReportParams, Depends()]
+
+
+async def send_push(token: str):
+    pass
 
 
 @router.get("")
@@ -41,9 +45,12 @@ async def get_reports(
 async def post_report(
     session: SessionDep,
     user: UserDep,
-    training: CreateReport,
+    report: CreateReport,
+    background_tasks: BackgroundTasks,
 ) -> Report:
     """Create a new report"""
-    new_report = await reports_db.create_report(session, user.sub, training)
+    new_report = await reports_db.create_report(session, user.sub, report)
     info(f"New report created: {new_report}")
+    if report.token is not None:
+        background_tasks.add_task(send_push, report.token)
     return new_report
