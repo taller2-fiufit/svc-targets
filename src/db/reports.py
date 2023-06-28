@@ -40,7 +40,7 @@ async def get_reports(
 async def create_report(
     session: AsyncSession, author: int, report: CreateReport
 ) -> Report:
-    new_report = DBReport(**report.dict(), author=author)
+    new_report = DBReport(type=report.type, count=report.count, author=author)
 
     # to reassure mypy
     assert report.type is not None
