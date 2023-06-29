@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,7 +47,9 @@ async def create_report(
     assert report.type is not None
     assert report.count is not None
 
-    completed = await targets_db.update_targets(session, author, report.type, report.count)
+    completed = await targets_db.update_targets(
+        session, author, report.type, report.count
+    )
 
     session.add(new_report)
     await session.commit()
