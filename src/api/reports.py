@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List, Annotated
+from typing import List, Annotated, Tuple
 from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.api.model.report import CreateReport, Report, ReportParams
