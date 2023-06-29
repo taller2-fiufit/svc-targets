@@ -3,6 +3,7 @@ from typing import List, Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.api.model.report import CreateReport, Report, ReportParams
+from src.api.model.target import Target
 from src.api.aliases import SessionDep, UserDep
 from src.auth import get_user
 from src.db.utils import get_session
