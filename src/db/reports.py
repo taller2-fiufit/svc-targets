@@ -8,6 +8,7 @@ from src.api.model.report import (
     CreateReport,
     Report,
 )
+from src.api.model.target import Target
 from src.common import TargetType
 from src.db.model.report import DBReport
 import src.db.targets as targets_db
@@ -39,16 +40,16 @@ async def get_reports(
 
 async def create_report(
     session: AsyncSession, author: int, report: CreateReport
-) -> Report:
+) -> Tuple[Report, List[Target]]:
     new_report = DBReport(type=report.type, count=report.count, author=author)
 
     # to reassure mypy
     assert report.type is not None
     assert report.count is not None
 
-    await targets_db.update_targets(session, author, report.type, report.count)
+    completed = await targets_db.update_targets(session, author, report.type, report.count)
 
     session.add(new_report)
     await session.commit()
 
-    return new_report.to_api()
+    return new_report.to_api(), completed
