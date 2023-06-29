@@ -1,60 +1,37 @@
-from typing import List
-import requests
-from requests.exceptions import ConnectionError, HTTPError
-from exponent_server_sdk import (  # type: ignore
-    PushClient,
-    PushMessage,
-    PushTicketError,
-)
-from src.api.model.target import Target
+import asyncio
+from typing import Any, List
+from httpx import AsyncClient
 
+from src.api.model.target import Target
 from src.logging import error
 
 
 # Optionally providing an access token within a session
 # if you have enabled push security
-def send_push(token: str, completed: List[Target]) -> None:
-    send_push_messages(
-        token,
-        [
-            f"Congratulations on your completion of target '{target.name}'!"
-            for target in completed
-        ],
-    )
+async def send_push(token: str, completed: List[Target]) -> None:
+    messages = [
+        {
+            "to": token,
+            "sound": "default",
+            "title": "Kinetix",
+            "body": f"Congratulations on your completion of target '{target.name}'!",
+            "data": {"screen": "Messages"},
+        }
+        for target in completed
+    ]
+    await asyncio.gather(*[send_push_message(message) for message in messages])
 
 
-# TAKEN from https://github.com/expo-community/expo-server-sdk-python
-
-EXPO_SESSION = requests.Session()
-# session.headers.update(
-#     {
-#         "Authorization": f"Bearer {os.getenv('EXPO_TOKEN')}",
-#         "accept": "application/json",
-#         "accept-encoding": "gzip, deflate",
-#         "content-type": "application/json",
-#     }
-# )
-
-
-# Basic arguments. You should extend this function with the push
-# features you want to use, or simply pass in a `PushMessage` object.
-def send_push_messages(token: str, messages: List[str]) -> None:
-    for tries in range(5):
-        try:
-            client = PushClient(session=EXPO_SESSION)
-            responses = client.publish_multiple(
-                [PushMessage(to=token, body=msg) for msg in messages]
+async def send_push_message(message: dict[str, Any]) -> None:
+    headers = {
+        "Accept": "application/json",
+        "Accept-encoding": "gzip, deflate",
+        "Content-Type": "application/json",
+    }
+    try:
+        async with AsyncClient(base_url="https://exp.host") as client:
+            await client.post(
+                "/--/api/v2/push/send", headers=headers, json=message
             )
-            # We got a response back, but we don't know whether it's an error yet.
-            # This call raises errors so we can handle them with normal exception
-            # flows.
-            [response.validate_response() for response in responses]
-        except (ConnectionError, HTTPError, PushTicketError) as exc:
-            # Encountered some Connection or HTTP error - retry a few times in
-            # case it is transient.
-            if tries <= 4:
-                tries += 1
-                continue
-            error(str(exc))
-        except Exception as exc:
-            error(str(exc))
+    except Exception as e:
+        error(str(e))
