@@ -21,7 +21,10 @@ router = APIRouter(
 Filters = Annotated[ReportParams, Depends()]
 
 
-async def send_push(token: str):
+def send_push(
+    token: str,
+    completed: List[Target]
+) -> None:
     pass
 
 
@@ -52,5 +55,5 @@ async def post_report(
     new_report = await reports_db.create_report(session, user.sub, report)
     info(f"New report created: {new_report}")
     if report.token is not None:
-        background_tasks.add_task(send_push, report.token)
+        background_tasks.add_task(send_push, report.token, [])
     return new_report
