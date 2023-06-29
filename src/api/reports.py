@@ -53,8 +53,8 @@ async def post_report(
     background_tasks: BackgroundTasks,
 ) -> Report:
     """Create a new report"""
-    new_report = await reports_db.create_report(session, user.sub, report)
+    new_report, completed = await reports_db.create_report(session, user.sub, report)
     info(f"New report created: {new_report}")
     if report.token is not None:
-        background_tasks.add_task(send_push, report.token, [])
+        background_tasks.add_task(send_push, report.token, completed)
     return new_report
