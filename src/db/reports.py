@@ -43,14 +43,25 @@ async def get_reports(
 async def create_report(
     session: AsyncSession, author: int, report: CreateReport
 ) -> Tuple[Report, List[Target]]:
-    new_report = DBReport(type=report.type, count=report.count, author=author)
+    new_report = DBReport(
+        type=report.type,
+        count=report.count,
+        author=author,
+    )
+
+    date = report.get_date()
+
+    if date is not None:
+        new_report.date = date
+    else:
+        date = datetime.utcnow()
 
     # to reassure mypy
     assert report.type is not None
     assert report.count is not None
 
     completed = await targets_db.update_targets(
-        session, author, report.type, report.count
+        session, author, report.type, report.count, date
     )
 
     session.add(new_report)

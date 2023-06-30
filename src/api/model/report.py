@@ -35,6 +35,15 @@ class CreateReport(AllRequiredReportBase):
         max_length=255,
         default=None,
     )
+    date: Optional[str] = Field(
+        title="Date",
+        description="The date for the report.",
+        max_length=64,
+        default=None,
+    )
+
+    def get_date(self) -> Optional[datetime]:
+        return parse_time(self.date)
 
 
 class Report(AllRequiredReportBase):
@@ -49,19 +58,17 @@ class ReportParams(BaseModel):
     end: Optional[str] = Field(Query(None, title="Query end date"))
 
     def get_start(self) -> Optional[datetime]:
-        if self.start is None:
-            return None
-        return (
-            datetime.fromisoformat(self.start)
-            .astimezone(tz=timezone.utc)
-            .replace(tzinfo=None)
-        )
+        return parse_time(self.start)
 
     def get_end(self) -> Optional[datetime]:
-        if self.end is None:
-            return None
-        return (
-            datetime.fromisoformat(self.end)
-            .astimezone(tz=timezone.utc)
-            .replace(tzinfo=None)
-        )
+        return parse_time(self.end)
+
+
+def parse_time(s: Optional[str]) -> Optional[datetime]:
+    if s is None:
+        return None
+    return (
+        datetime.fromisoformat(s)
+        .astimezone(tz=timezone.utc)
+        .replace(tzinfo=None)
+    )

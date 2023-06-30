@@ -7,8 +7,8 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from src.api.model.report import Report
 
+from src.api.model.report import Report
 from src.db.model.base import Base
 from src.common import TargetType
 
