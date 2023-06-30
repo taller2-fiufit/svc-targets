@@ -566,14 +566,14 @@ crt = ["awscrt (==0.16.9)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.29.163"
+version = "1.29.164"
 description = "Type annotations and code completion for botocore"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "botocore_stubs-1.29.163-py3-none-any.whl", hash = "sha256:9ad67195e9697bfa2d005a9a2672acc148c49c5db8e5e63a59ef08fbdca809b9"},
-    {file = "botocore_stubs-1.29.163.tar.gz", hash = "sha256:ff50f9f611142a8a60ecb0cfab374a3d23459db41b99be8610f774cb52cd7077"},
+    {file = "botocore_stubs-1.29.164-py3-none-any.whl", hash = "sha256:b6a2ec87def9cbeb98a07a88fc8eb4269d2de3d4d4db8d27767d17eeb4e0a6e2"},
+    {file = "botocore_stubs-1.29.164.tar.gz", hash = "sha256:3f0f70aad40246c097b9d42a24d591ffd4aa761f0f533b51997e010f15a34ea5"},
 ]
 
 [package.dependencies]
@@ -583,7 +583,7 @@ types-awscrt = "*"
 name = "certifi"
 version = "2023.5.7"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -958,7 +958,7 @@ files = [
 name = "httpcore"
 version = "0.16.3"
 description = "A minimal low-level HTTP client."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -980,7 +980,7 @@ socks = ["socksio (>=1.0.0,<2.0.0)"]
 name = "httpx"
 version = "0.23.3"
 description = "The next generation HTTP client."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1456,7 +1456,7 @@ pycryptodome = ["pyasn1", "pycryptodome (>=3.3.1,<4.0.0)"]
 name = "rfc3986"
 version = "1.5.0"
 description = "Validating URI References per RFC 3986"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -1729,4 +1729,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "1f60efc8d4b57b27d4bb493669fc7685452f73ace1b5650d66fee905cfd3af9d"
+content-hash = "c6bdb1baaadbbaf98d430719dcb88ad8a145c92f939c827c79ca324e7b08cbf6"
