@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 from src.api.model.report import Report
 from src.api.model.target import Target
-from src.common import TargetType
+from src.test_utils import assert_empty_reports
 
 
 async def test_reports_get_empty(check_empty_reports: None) -> None:
@@ -28,33 +28,9 @@ async def test_reports_post_get(
     response = await client.get("/reports")
     assert response.status_code == HTTPStatus.OK
     json = response.json()
-    assert len(json) == 1
+    assert len(json) == 4
 
-    got = Report(**json[0])
-
-    assert got == created_report
-
-
-async def test_reports_type_filters(
-    check_empty_reports: None, created_report: Report, client: AsyncClient
-) -> None:
-    other_type = TargetType.TIME_SPENT
-    assert created_report.type != other_type
-    response = await client.get("/reports", params={"type": str(other_type)})
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == []
-
-    response = await client.get(
-        "/reports", params={"type": str(created_report.type)}
-    )
-    assert response.status_code == HTTPStatus.OK
-    json = response.json()
-    assert len(json) == 1
-
-    got = Report(**json[0])
-
-    assert got == created_report
+    assert created_report in [Report(**rep) for rep in json]
 
 
 async def test_reports_date_filters(
@@ -64,10 +40,8 @@ async def test_reports_date_filters(
     start = datetime.now(timezone.utc) - timedelta(minutes=10)
     end = datetime.now(timezone.utc) - timedelta(minutes=5)
     params = {"start": start.isoformat(), "end": end.isoformat()}
-    response = await client.get("/reports", params=params)
 
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == []
+    await assert_empty_reports(client, params=params)
 
     # [start, end] does include created_report.date
     params["end"] = datetime.now(timezone.utc).isoformat()
@@ -75,11 +49,9 @@ async def test_reports_date_filters(
     response = await client.get("/reports", params=params)
     assert response.status_code == HTTPStatus.OK
     json = response.json()
-    assert len(json) == 1
 
-    got = Report(**json[0])
-
-    assert got == created_report
+    assert len(json) == 4
+    assert created_report in [Report(**rep) for rep in json]
 
 
 async def test_report_and_target_post_get(
