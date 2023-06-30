@@ -112,16 +112,26 @@ async def delete_target(session: AsyncSession, author: int, id: int) -> Target:
 
 async def update_targets(
     session: AsyncSession, author: int, type: TargetType, count: float
-) -> None:
-    """Updates the targets with the given type and author by the given count"""
+) -> List[Target]:
+    """
+    Updates the targets with the given type and author by the given count.
+    Returns a list of just completed targets.
+    """
     now = datetime.utcnow()
     query = (
         select(DBTarget)
         .filter_by(author=author, type=type)
         .filter(DBTarget.limit > now)
+        .filter(DBTarget.current != DBTarget.target)
     )
     res = await session.scalars(query)
+
+    completed = []
 
     for target in res:
         target.current = min(target.current + count, target.target)
         session.add(target)
+        if target.current == target.target:
+            completed.append(target.to_api_model())
+
+    return completed
