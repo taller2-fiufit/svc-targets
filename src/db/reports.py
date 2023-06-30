@@ -31,16 +31,14 @@ async def get_reports(
     if end is not None:
         query = query.filter(DBReport.date <= end)
 
-    res = await session.execute(query)
+    res = await session.scalars(query)
 
-    reports = [Report(type=r[0].type, count=r[1]) for r in res.all()]
-    types = [r.type for r in reports]
+    reports = {v: Report(type=v, count=0) for v in TargetType}
 
-    for v in TargetType:
-        if v not in types:
-            reports.append(Report(type=v, count=0))
+    for report in res.all():
+        reports[report.type].count += report.count
 
-    return reports
+    return list(reports.values())
 
 
 async def create_report(
