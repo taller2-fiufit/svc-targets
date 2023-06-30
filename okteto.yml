@@ -20,6 +20,7 @@ deploy:
   - kubectl delete secret "targets-secrets" || true
   - kubectl create secret generic "targets-secrets"
     --from-literal="auth-secret"="${AUTH_SECRET}"
+    --from-literal="apikey"="${TARGETS_APIKEY}"
     --from-literal="aws-access-key-id"="${AWS_ACCESS_KEY_ID}"
     --from-literal="aws-secret-access-key"="${AWS_SECRET_ACCESS_KEY}"
   # update kubernetes status

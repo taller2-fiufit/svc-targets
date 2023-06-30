@@ -29,6 +29,11 @@ spec:
                 secretKeyRef:
                   name: targets-secrets
                   key: auth-secret
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: targets-secrets
+                  key: apikey
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:

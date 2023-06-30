@@ -1,12 +1,12 @@
 from http import HTTPStatus
 import os
-from typing import Annotated
-from fastapi import Depends, HTTPException
-
+from typing import Annotated, Optional
+from starlette.types import Receive, Scope, Send, ASGIApp
+from starlette.datastructures import Headers
 from pydantic import BaseModel
 from jose import jwt
 from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
-
+from fastapi import Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordBearer
 
 AUTH_SECRET = os.getenv("AUTH_SECRET")
@@ -56,3 +56,30 @@ DUMMY_ADMIN = User(email="dummy@example.com", sub=1, admin=True)
 async def ignore_auth() -> User:
     """Used for tests without authentication"""
     return DUMMY_ADMIN
+
+
+APIKEY = os.getenv("APIKEY")
+APIKEY_HEADER = "X-Apikey"
+
+
+def req_apikey_is_valid(apikey: Optional[str]) -> bool:
+    """Returns True if the apikey is valid or we aren't checking"""
+    return APIKEY is None or apikey == APIKEY
+
+
+class ApikeyMiddleware:
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        assert scope["type"] == "http"
+        apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
+
+        if not req_apikey_is_valid(apikey) and scope["path"] != "/health":
+            response = Response(status_code=HTTPStatus.UNAUTHORIZED)
+            await response(scope, receive, send)
+            return
+
+        await self.app(scope, receive, send)
