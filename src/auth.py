@@ -82,6 +82,6 @@ class ApikeyMiddleware(BaseHTTPMiddleware):
         apikey = headers.get(APIKEY_HEADER, None)
 
         if request.url.path != "/health" and not req_apikey_is_valid(apikey):
-            raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+            return Response(status_code=HTTPStatus.UNAUTHORIZED)
 
         return await call_next(request)
