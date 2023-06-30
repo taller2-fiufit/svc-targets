@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.model.report import (
@@ -19,11 +19,7 @@ async def get_reports(
     start: Optional[datetime],
     end: Optional[datetime],
 ) -> List[Report]:
-    query = (
-        select(DBReport, func.sum(DBReport.count))
-        .group_by(DBReport.type)
-        .filter_by(author=user)
-    )
+    query = select(DBReport).filter_by(author=user)
 
     if start is not None:
         query = query.filter(DBReport.date >= start)
