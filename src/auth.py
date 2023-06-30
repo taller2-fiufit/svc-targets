@@ -82,7 +82,7 @@ class ApikeyMiddleware:
         assert scope["type"] == "http"
         apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
 
-        if not req_apikey_is_valid(apikey) and scope["path"] != "/health":
+        if scope["path"] != "/health" and not req_apikey_is_valid(apikey):
             response = Response(status_code=HTTPStatus.UNAUTHORIZED)
             await response(scope, receive, send)
             return
