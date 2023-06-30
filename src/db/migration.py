@@ -11,13 +11,11 @@ from src.db.session import engine
 
 
 def run_upgrade(conn: Connection, config: Config) -> None:
-    debug("upgrading database.")
     config.attributes["connection"] = conn
     command.upgrade(config, "head")
 
 
 def run_downgrade(conn: Connection, config: Config) -> None:
-    debug("resetting database.")
     config.attributes["connection"] = conn
     command.downgrade(config, "base")
 
@@ -45,9 +43,11 @@ async def run_alembic_cmd(
 
 async def upgrade_db() -> None:
     """Upgrade DB via 'alembic upgrade head'"""
+    debug("upgrading database.")
     await run_alembic_cmd(run_upgrade, retry=True)
 
 
 async def downgrade_db() -> None:
     """Downgrade DB via 'alembic downgrade base"""
+    debug("resetting database.")
     await run_alembic_cmd(run_downgrade, retry=False)

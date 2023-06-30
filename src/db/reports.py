@@ -31,10 +31,11 @@ async def get_reports(
     res = await session.scalars(query)
 
     reports = {v: Report(type=v, count=0) for v in TargetType}
+    print(reports)
 
     for report in res.all():
-        reports[report.type].count = (
-            reports[report.type].count or 0 + report.count or 0
+        reports[report.type].count = (reports[report.type].count or 0) + (
+            report.count or 0
         )
 
     return list(reports.values())

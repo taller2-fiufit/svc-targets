@@ -60,7 +60,7 @@ async def ignore_auth() -> User:
     return DUMMY_ADMIN
 
 
-APIKEY = os.getenv("APIKEY")
+APIKEY = None  # os.getenv("APIKEY")
 APIKEY_HEADER = "X-Apikey"
 
 
@@ -79,7 +79,9 @@ class ApikeyMiddleware:
     async def __call__(
         self, scope: Scope, receive: Receive, send: Send
     ) -> None:
-        assert scope["type"] == "http"
+        if scope["type"] != "http":
+            return
+
         apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
 
         if scope["path"] != "/health" and not req_apikey_is_valid(apikey):

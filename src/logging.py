@@ -32,7 +32,7 @@ class EndpointFilter(logging.Filter):
         if not isinstance(record.args, tuple):
             return True
 
-        return record.args[2] != "/health"
+        return record.args[2] not in ["/health", "/openapi.json"]
 
 
 logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
