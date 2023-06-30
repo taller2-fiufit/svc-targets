@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.model.report import (
@@ -16,14 +16,14 @@ import src.db.targets as targets_db
 async def get_reports(
     session: AsyncSession,
     user: int,
-    type: Optional[TargetType],
     start: Optional[datetime],
     end: Optional[datetime],
 ) -> List[Report]:
-    query = select(DBReport).filter_by(author=user)
-
-    if type is not None:
-        query = query.filter_by(type=type)
+    query = (
+        select(DBReport, func.sum(DBReport.count))
+        .group_by(DBReport.type)
+        .filter_by(author=user)
+    )
 
     if start is not None:
         query = query.filter(DBReport.date >= start)
@@ -31,10 +31,16 @@ async def get_reports(
     if end is not None:
         query = query.filter(DBReport.date <= end)
 
-    res = await session.scalars(query)
-    reports = res.all()
+    res = await session.execute(query)
 
-    return list(map(DBReport.to_api, reports))
+    reports = [Report(type=r[0].type, count=r[1]) for r in res.all()]
+    types = [r.type for r in reports]
+
+    for v in TargetType:
+        if v not in types:
+            reports.append(Report(type=v, count=0))
+
+    return reports
 
 
 async def create_report(

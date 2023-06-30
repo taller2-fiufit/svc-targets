@@ -31,7 +31,6 @@ async def get_reports(
     return await reports_db.get_reports(
         session,
         user.sub,
-        f.type,
         f.get_start(),
         f.get_end(),
     )

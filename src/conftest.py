@@ -7,7 +7,7 @@ from http import HTTPStatus
 from src.api.model.report import CreateReport, Report
 from src.common import TargetType
 
-from src.test_utils import assert_returns_empty
+from src.test_utils import assert_empty_reports, assert_returns_empty
 from src.auth import get_admin, get_user, ignore_auth
 from src.db.migration import downgrade_db
 from src.main import app, lifespan
@@ -89,14 +89,11 @@ async def created_target(client: AsyncClient) -> Target:
 
 @pytest.fixture
 async def check_empty_reports(client: AsyncClient) -> None:
-    await assert_returns_empty(client, "/reports")
+    await assert_empty_reports(client)
 
 
 @pytest.fixture
 async def created_report(client: AsyncClient) -> Report:
-    # backend uses UTC and without milliseconds
-    start = datetime.now(timezone.utc).replace(microsecond=0)
-
     body = CreateReport(
         type=TargetType.DISTANCE_TRAVELLED,
         count=1.0,
@@ -113,10 +110,5 @@ async def created_report(client: AsyncClient) -> Report:
     assert result == body
 
     report = Report(**json)
-
-    got_date = datetime.fromisoformat(report.date)
-    now = datetime.now(timezone.utc)
-
-    assert start <= got_date <= now
 
     return report
