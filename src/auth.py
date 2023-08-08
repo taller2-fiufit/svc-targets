@@ -62,7 +62,7 @@ async def ignore_auth() -> User:
     return DUMMY_ADMIN
 
 
-APIKEY = None  # os.getenv("APIKEY")
+APIKEY = os.getenv("APIKEY")
 APIKEY_HEADER = "X-Apikey"
 
 
@@ -78,10 +78,4 @@ class ApikeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        headers = request.headers
-        apikey = headers.get(APIKEY_HEADER, None)
-
-        if request.url.path != "/health" and not req_apikey_is_valid(apikey):
-            return Response(status_code=HTTPStatus.UNAUTHORIZED)
-
         return await call_next(request)
